@@ -1,6 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Award, BookOpen, Download, FileText, Printer, User } from 'lucide-react';
 
+// Helper for rendering standard inputs (Moved outside App to prevent focus loss on re-render)
+const FormInput = ({ label, type = "text", placeholder, value, onChange, readOnly }) => (
+  <div className="flex flex-col">
+    <label className="text-sm font-semibold text-gray-700 mb-1">{label}</label>
+    <input 
+      type={type} 
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      readOnly={readOnly}
+      className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 print:border-none print:p-0 print:bg-transparent print:resize-none font-medium text-slate-800 ${readOnly ? 'bg-slate-50 text-slate-500 print:text-slate-800 print:bg-white' : ''}`}
+    />
+  </div>
+);
+
+// Helper to safely format CSV strings
+const safeCSV = (str) => {
+  if (!str) return "";
+  return `"${String(str).replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+};
+
 export default function App() {
   const [keyStage, setKeyStage] = useState('early_years');
   
@@ -60,7 +81,7 @@ export default function App() {
     setSeniorGrades(newGrades);
   };
 
-  // NEW: State for Section 3 (Attitude & Social)
+  // State for Section 3 (Attitude & Social)
   const [eySocial1, setEySocial1] = useState('');
   const [eySocial2, setEySocial2] = useState('');
   const [attitudeScores, setAttitudeScores] = useState(Array(6).fill(''));
@@ -78,7 +99,7 @@ export default function App() {
     setBehavioralScores(newScores);
   };
 
-  // NEW: State for Section 4 (Educator Remarks)
+  // State for Section 4 (Educator Remarks)
   const [classTeacherComment, setClassTeacherComment] = useState('');
   const [formTutorComment, setFormTutorComment] = useState('');
   const [educatorName, setEducatorName] = useState('');
@@ -106,18 +127,13 @@ export default function App() {
     };
   }, []);
 
-  // Helper to safely format CSV strings (removes commas and newlines that break formatting)
-  const safeCSV = (str) => {
-    if (!str) return "";
-    return `"${String(str).replace(/"/g, '""').replace(/\n/g, ' ')}"`;
-  };
-
   // Excel/CSV Export Function
   const exportToExcel = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
     
     // --- Header ---
-    csvContent += "SHAH LALJI NANGPAR ACADEMY - HOLISTIC REPORT CARD\n\n";
+    csvContent += "SHAH LALJI NANGPAR ACADEMY - ACADEMIC & PERFORMANCE CARD\n";
+    csvContent += "P.O. Box 55-20100 Nakuru, Kenya | Tel: +254735490358\n\n";
     
     // --- SECTION 1 ---
     csvContent += "SECTION 1: STUDENT DETAILS\n";
@@ -198,7 +214,6 @@ export default function App() {
     csvContent += `Educator Name,${safeCSV(educatorName)}\n`;
     csvContent += `Date,${safeCSV(signDate)}\n`;
 
-    // Trigger the download
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -208,37 +223,22 @@ export default function App() {
     document.body.removeChild(link);
   };
 
-  // Helper for rendering standard inputs
-  const FormInput = ({ label, type = "text", placeholder, value, onChange, readOnly }) => (
-    <div className="flex flex-col">
-      <label className="text-sm font-semibold text-gray-700 mb-1">{label}</label>
-      <input 
-        type={type} 
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        readOnly={readOnly}
-        className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 print:border-none print:p-0 print:bg-transparent print:resize-none font-medium text-slate-800 ${readOnly ? 'bg-slate-50 text-slate-500 print:text-slate-800 print:bg-white' : ''}`}
-      />
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans print:bg-white print:p-0">
       <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden print:shadow-none">
         
-        {/* Header */}
-        <div className="bg-slate-800 text-white p-6 flex justify-between items-center print:bg-white print:text-slate-800 print:border-b-2 print:border-slate-800 print:px-0">
+        {/* SCREEN HEADER (Hidden on Print) */}
+        <div className="bg-slate-800 text-white p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 print:hidden">
           <div>
             <h1 className="text-2xl font-bold font-serif tracking-wide">ACADEMIC & PERFORMANCE CARD</h1>
-            <p className="text-slate-300 print:text-slate-500 mt-1 text-sm">Shah Lalji Nangpar Academy Report</p>
+            <p className="text-slate-300 mt-1 text-sm">Shah Lalji Nangpar Academy Report</p>
           </div>
           
-          <div className="flex items-end gap-3 print:hidden">
+          <div className="flex items-end gap-3">
             <div className="flex flex-col items-end mr-2">
               <label className="text-sm font-semibold text-slate-300 mb-1">Select Key Stage:</label>
               <select 
-                className="bg-white text-slate-800 px-3 py-2 rounded-md font-semibold focus:outline-none cursor-pointer"
+                className="bg-white text-slate-800 px-3 py-2 rounded-md font-semibold focus:outline-none cursor-pointer shadow-sm"
                 value={keyStage}
                 onChange={(e) => setKeyStage(e.target.value)}
               >
@@ -250,25 +250,55 @@ export default function App() {
             
             <button 
               onClick={exportToExcel}
-              className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 h-[40px] rounded-md font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+              className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 h-[40px] rounded-md font-semibold flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
               title="Download as Excel (CSV)"
             >
               <Download size={18} />
-              <span>Excel</span>
+              <span className="hidden sm:inline">Excel</span>
             </button>
 
             <button 
               onClick={() => window.print()}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 h-[40px] rounded-md font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+              className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 h-[40px] rounded-md font-semibold flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
               title="Save as PDF or Print"
             >
               <Printer size={18} />
-              <span>Print</span>
+              <span className="hidden sm:inline">Print</span>
             </button>
           </div>
         </div>
 
-        <div className="p-8 print:p-0 print:pt-6 space-y-8 print:space-y-6">
+        {/* PRINT HEADER (Hidden on Screen, Visible only on PDF) */}
+        <div className="hidden print:flex flex-row justify-between items-end border-b-4 border-slate-800 pb-6 mb-6 pt-4">
+          <div className="flex items-center gap-6">
+            <div className="w-28 h-28 flex items-center justify-center shrink-0">
+              <img 
+                src="/shah_lalji_logo.jpg" 
+                alt="Shah Lalji Nangpar Academy Logo" 
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = "https://placehold.co/100x100/eeeeee/333333?text=SLNA";
+                }}
+              />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold font-serif tracking-wide text-black uppercase">
+                Shah Lalji Nangpar Academy
+              </h1>
+              <p className="text-slate-700 mt-1 text-base font-medium">
+                P.O. Box 55-20100 Nakuru, Kenya | Tel: +254735490358
+              </p>
+              <div className="mt-3 border-t border-slate-300 pt-2 inline-block">
+                <h2 className="text-xl font-bold text-slate-800 uppercase tracking-widest">
+                  Academic & Performance Card
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8 print:p-0 print:pt-2 space-y-8 print:space-y-6">
           
           {/* SECTION 1: Universal Student Details */}
           <section className="bg-slate-50 print:bg-white p-6 print:p-0 rounded-lg border border-slate-200 print:border-none">
@@ -385,7 +415,6 @@ export default function App() {
                         const mteNum = parseFloat(row.mte);
                         const eteNum = parseFloat(row.ete);
                         
-                        // Automatically calculate TA and Grade if both MTE and ETE are filled out
                         if (!isNaN(mteNum) && !isNaN(eteNum)) {
                           const taNum = (mteNum + eteNum) / 2;
                           ta = taNum.toFixed(1);
