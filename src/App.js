@@ -3,6 +3,97 @@ import { Award, BookOpen, Download, FileText, Printer, User } from 'lucide-react
 
 export default function App() {
   const [keyStage, setKeyStage] = useState('early_years');
+  
+  // State for Student Details
+  const [studentName, setStudentName] = useState('');
+  const [studentAge, setStudentAge] = useState('');
+  const [studentClass, setStudentClass] = useState('');
+  const [admissionNum, setAdmissionNum] = useState('');
+  const [assessmentPeriod, setAssessmentPeriod] = useState('');
+
+  // State for Attendance
+  const [totalDays, setTotalDays] = useState('');
+  const [daysAttended, setDaysAttended] = useState('');
+
+  // State for Early Years Grades (Section 2)
+  const [earlyYearsData, setEarlyYearsData] = useState([
+    { category: 'Communications', milestone: '', grade: '3', notes: '' },
+    { category: 'Numerics & Color/Shapes', milestone: '', grade: '3', notes: '' },
+    { category: 'Motor Skills', milestone: '', grade: '3', notes: '' },
+    { category: 'Reading/Writing', milestone: '', grade: '3', notes: '' }
+  ]);
+
+  const handleEarlyYearsChange = (index, field, value) => {
+    const newData = [...earlyYearsData];
+    newData[index][field] = value;
+    setEarlyYearsData(newData);
+  };
+
+  // State for Junior School Grades (Section 2)
+  const [juniorGrades, setJuniorGrades] = useState([
+    { subject: 'English', mte: '', ete: '', grade: '' },
+    { subject: 'Mathematics', mte: '', ete: '', grade: '' },
+    { subject: 'Science', mte: '', ete: '', grade: '' },
+    { subject: 'Computing', mte: '', ete: '', grade: '' },
+    { subject: 'Art & Design', mte: '', ete: '', grade: '' },
+    { subject: 'French', mte: '', ete: '', grade: '' },
+    { subject: 'Geography', mte: '', ete: '', grade: '' },
+    { subject: 'History', mte: '', ete: '', grade: '' },
+    { subject: 'Music', mte: '', ete: '', grade: '' }
+  ]);
+
+  const handleJuniorGradeChange = (index, field, value) => {
+    const updatedGrades = [...juniorGrades];
+    updatedGrades[index][field] = value;
+    setJuniorGrades(updatedGrades);
+  };
+
+  // State for Senior School Grades (Section 2)
+  const [examBoard, setExamBoard] = useState('');
+  const [seniorGrades, setSeniorGrades] = useState(
+    Array.from({ length: 8 }, () => ({ code: '', title: '', result: '', mark: '' }))
+  );
+
+  const handleSeniorGradeChange = (index, field, value) => {
+    const newGrades = [...seniorGrades];
+    newGrades[index][field] = value;
+    setSeniorGrades(newGrades);
+  };
+
+  // NEW: State for Section 3 (Attitude & Social)
+  const [eySocial1, setEySocial1] = useState('');
+  const [eySocial2, setEySocial2] = useState('');
+  const [attitudeScores, setAttitudeScores] = useState(Array(6).fill(''));
+  const [behavioralScores, setBehavioralScores] = useState(Array(4).fill('Excellent'));
+
+  const handleAttitudeChange = (index, value) => {
+    const newScores = [...attitudeScores];
+    newScores[index] = value;
+    setAttitudeScores(newScores);
+  };
+
+  const handleBehaviorChange = (index, value) => {
+    const newScores = [...behavioralScores];
+    newScores[index] = value;
+    setBehavioralScores(newScores);
+  };
+
+  // NEW: State for Section 4 (Educator Remarks)
+  const [classTeacherComment, setClassTeacherComment] = useState('');
+  const [formTutorComment, setFormTutorComment] = useState('');
+  const [educatorName, setEducatorName] = useState('');
+  const [signDate, setSignDate] = useState('');
+
+  // Function to safely calculate the percentage
+  const calculateAttendance = () => {
+    const total = parseFloat(totalDays);
+    const attended = parseFloat(daysAttended);
+    
+    if (!isNaN(total) && !isNaN(attended) && total > 0) {
+      return ((attended * 100) / total).toFixed(1) + '%';
+    }
+    return '';
+  };
 
   // Inject Tailwind via CDN on mount to ensure styles load
   useEffect(() => {
@@ -15,72 +106,134 @@ export default function App() {
     };
   }, []);
 
+  // Helper to safely format CSV strings (removes commas and newlines that break formatting)
+  const safeCSV = (str) => {
+    if (!str) return "";
+    return `"${String(str).replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+  };
+
   // Excel/CSV Export Function
   const exportToExcel = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
     
-    // Add School Header
+    // --- Header ---
     csvContent += "SHAH LALJI NANGPAR ACADEMY - HOLISTIC REPORT CARD\n\n";
     
-    // Add Student Details Section
-    csvContent += "STUDENT DETAILS\n";
-    csvContent += "Student Name,Age,Class,Admission Number\n";
-    csvContent += "Jackson Connor,4,Pre-K,ADM-2026\n\n"; // Mock data
+    // --- SECTION 1 ---
+    csvContent += "SECTION 1: STUDENT DETAILS\n";
+    csvContent += "Student Name,Age,Class,Admission Number,Assessment Period,Total Days,Days Attended,% Attendance\n";
+    csvContent += `${safeCSV(studentName)},${safeCSV(studentAge)},${safeCSV(studentClass)},${safeCSV(admissionNum)},${safeCSV(assessmentPeriod)},${safeCSV(totalDays)},${safeCSV(daysAttended)},${safeCSV(calculateAttendance())}\n\n`; 
     
-    // Adapt Excel rows based on Key Stage
+    // --- SECTION 2 ---
     if (keyStage === 'early_years') {
-      csvContent += "ACADEMIC PROGRESS - EARLY YEARS\n";
+      csvContent += "SECTION 2: ACADEMIC PROGRESS - EARLY YEARS\n";
       csvContent += "Category,Milestone,Grading (1-3),Notes\n";
-      csvContent += "Communications,Speaks clearly,3,Acing it!\n";
-      csvContent += "Motor Skills,Writes with pencil,2,Steady improvement\n";
+      earlyYearsData.forEach(row => {
+        csvContent += `${safeCSV(row.category)},${safeCSV(row.milestone)},${safeCSV(row.grade)},${safeCSV(row.notes)}\n`;
+      });
     } else if (keyStage === 'junior') {
-      csvContent += "ACADEMIC PROGRESS - JUNIOR SCHOOL\n";
+      csvContent += "SECTION 2: ACADEMIC PROGRESS - JUNIOR SCHOOL\n";
       csvContent += "Subject,MTE,ETE,TA %,Grade\n";
-      csvContent += "English,85,88,86.5,A2\n";
-      csvContent += "Mathematics,92,95,93.5,A1\n";
-      csvContent += "Science,78,82,80,A2\n";
+      juniorGrades.forEach(row => {
+        let ta = '';
+        let autoGrade = '';
+        const mteNum = parseFloat(row.mte);
+        const eteNum = parseFloat(row.ete);
+        
+        if (!isNaN(mteNum) && !isNaN(eteNum)) {
+          const taNum = (mteNum + eteNum) / 2;
+          ta = taNum.toFixed(1);
+          if (taNum >= 90) autoGrade = 'A1';
+          else if (taNum >= 80) autoGrade = 'A2';
+          else if (taNum >= 70) autoGrade = 'B1';
+          else if (taNum >= 60) autoGrade = 'B2';
+          else if (taNum >= 50) autoGrade = 'C1';
+          else if (taNum >= 40) autoGrade = 'C2';
+          else if (taNum >= 30) autoGrade = 'D1';
+          else if (taNum >= 20) autoGrade = 'D2';
+          else autoGrade = 'E';
+        }
+        csvContent += `${safeCSV(row.subject)},${safeCSV(row.mte)},${safeCSV(row.ete)},${safeCSV(ta)},${safeCSV(autoGrade)}\n`;
+      });
     } else if (keyStage === 'senior') {
-      csvContent += "ACADEMIC PROGRESS - SENIOR SCHOOL\n";
+      csvContent += "SECTION 2: ACADEMIC PROGRESS - SENIOR SCHOOL\n";
+      csvContent += `Examination Board & Level: ${safeCSV(examBoard)}\n`;
       csvContent += "Syllabus Code,Syllabus Title,Result %,Uniform Mark\n";
-      csvContent += "0580,Mathematics,94,A*\n";
-      csvContent += "0450,Business Studies,88,A\n";
+      seniorGrades.forEach(row => {
+        if (row.code || row.title || row.result || row.mark) {
+          csvContent += `${safeCSV(row.code)},${safeCSV(row.title)},${safeCSV(row.result)},${safeCSV(row.mark)}\n`;
+        }
+      });
     }
+
+    // --- SECTION 3 ---
+    csvContent += "\nSECTION 3: ATTITUDE & SOCIAL COMPETENCIES\n";
+    if (keyStage === 'early_years') {
+      csvContent += "Metric,Notes\n";
+      csvContent += `Can work with others,${safeCSV(eySocial1)}\n`;
+      csvContent += `Can express issues and concerns calmly,${safeCSV(eySocial2)}\n`;
+    } else {
+      csvContent += "Attitude to Learning Scale,Score\n";
+      const attitudeTitles = [
+        "Curiosity & Focus", "Participation", "Help-Seeking & Independence",
+        "Response to Feedback", "Organization", "Behavior & Environment"
+      ];
+      attitudeTitles.forEach((title, idx) => {
+        csvContent += `${safeCSV(title)},${safeCSV(attitudeScores[idx])}\n`;
+      });
+      
+      csvContent += "\nForm Tutor Behavioral Summary,Rating\n";
+      const behaviorTitles = [
+        'Cooperate with Peers', 'Cooperate with Teachers', 'Discipline / Behaviour', 'Grooming & Appearance'
+      ];
+      behaviorTitles.forEach((title, idx) => {
+        csvContent += `${safeCSV(title)},${safeCSV(behavioralScores[idx])}\n`;
+      });
+    }
+
+    // --- SECTION 4 ---
+    csvContent += "\nSECTION 4: FINAL EDUCATOR REMARKS\n";
+    csvContent += `Class Teacher's Comment,${safeCSV(classTeacherComment)}\n`;
+    csvContent += `Form Tutor / Head of School Comment,${safeCSV(formTutorComment)}\n`;
+    csvContent += `Educator Name,${safeCSV(educatorName)}\n`;
+    csvContent += `Date,${safeCSV(signDate)}\n`;
 
     // Trigger the download
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Report_Card_${keyStage}.csv`);
+    link.setAttribute("download", `Report_Card_${studentName ? studentName.replace(/\s+/g, '_') : 'Student'}_${keyStage}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Helper for rendering a standard input
-  const FormInput = ({ label, type = "text", placeholder }) => (
+  // Helper for rendering standard inputs
+  const FormInput = ({ label, type = "text", placeholder, value, onChange, readOnly }) => (
     <div className="flex flex-col">
       <label className="text-sm font-semibold text-gray-700 mb-1">{label}</label>
       <input 
         type={type} 
         placeholder={placeholder}
-        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 print:border-none print:p-0 print:bg-transparent print:resize-none font-medium text-slate-800"
+        value={value}
+        onChange={onChange}
+        readOnly={readOnly}
+        className={`px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 print:border-none print:p-0 print:bg-transparent print:resize-none font-medium text-slate-800 ${readOnly ? 'bg-slate-50 text-slate-500 print:text-slate-800 print:bg-white' : ''}`}
       />
     </div>
   );
 
   return (
-    // We remove the gray background and padding when printing so it fills the page cleanly
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans print:bg-white print:p-0">
       <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden print:shadow-none">
         
         {/* Header */}
         <div className="bg-slate-800 text-white p-6 flex justify-between items-center print:bg-white print:text-slate-800 print:border-b-2 print:border-slate-800 print:px-0">
           <div>
-            <h1 className="text-2xl font-bold font-serif tracking-wide">UNIVERSAL HOLISTIC REPORT CARD</h1>
-            <p className="text-slate-300 print:text-slate-500 mt-1 text-sm">Shah Lalji Nangpar Academy Framework</p>
+            <h1 className="text-2xl font-bold font-serif tracking-wide">ACADEMIC & PERFORMANCE CARD</h1>
+            <p className="text-slate-300 print:text-slate-500 mt-1 text-sm">Shah Lalji Nangpar Academy Report</p>
           </div>
           
-          {/* These controls are completely hidden on the printed PDF */}
           <div className="flex items-end gap-3 print:hidden">
             <div className="flex flex-col items-end mr-2">
               <label className="text-sm font-semibold text-slate-300 mb-1">Select Key Stage:</label>
@@ -95,7 +248,6 @@ export default function App() {
               </select>
             </div>
             
-            {/* THE EXCEL BUTTON */}
             <button 
               onClick={exportToExcel}
               className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 h-[40px] rounded-md font-semibold flex items-center gap-2 transition-colors cursor-pointer"
@@ -105,7 +257,6 @@ export default function App() {
               <span>Excel</span>
             </button>
 
-            {/* THE PRINT BUTTON */}
             <button 
               onClick={() => window.print()}
               className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 h-[40px] rounded-md font-semibold flex items-center gap-2 transition-colors cursor-pointer"
@@ -127,17 +278,34 @@ export default function App() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <FormInput label="Student Name" placeholder="e.g. Jackson Connor" />
-              <FormInput label="Age" type="number" placeholder="e.g. 4" />
-              <FormInput label="Class" placeholder="e.g. Pre-K" />
-              <FormInput label="Admission Number" placeholder="e.g. ADM-2026" />
+              <FormInput label="Student Name" placeholder="e.g. Jackson Connor" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
+              <FormInput label="Age" type="number" placeholder="e.g. 4" value={studentAge} onChange={(e) => setStudentAge(e.target.value)} />
+              <FormInput label="Class" placeholder="e.g. Pre-K" value={studentClass} onChange={(e) => setStudentClass(e.target.value)} />
+              <FormInput label="Admission Number" placeholder="e.g. ADM-2026" value={admissionNum} onChange={(e) => setAdmissionNum(e.target.value)} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-200">
-              <FormInput label="Assessment Period" placeholder="e.g. End of Term II 2026" />
-              <FormInput label="Total Days" type="number" placeholder="e.g. 90" />
-              <FormInput label="Days Attended" type="number" placeholder="e.g. 85" />
-              <FormInput label="% Attendance" placeholder="e.g. 94.4%" />
+              <FormInput label="Assessment Period" placeholder="e.g. End of Term II 2026" value={assessmentPeriod} onChange={(e) => setAssessmentPeriod(e.target.value)} />
+              <FormInput 
+                label="Total Days" 
+                type="number" 
+                placeholder="e.g. 90" 
+                value={totalDays}
+                onChange={(e) => setTotalDays(e.target.value)}
+              />
+              <FormInput 
+                label="Days Attended" 
+                type="number" 
+                placeholder="e.g. 85" 
+                value={daysAttended}
+                onChange={(e) => setDaysAttended(e.target.value)}
+              />
+              <FormInput 
+                label="% Attendance" 
+                placeholder="Auto-calculated" 
+                value={calculateAttendance()}
+                readOnly={true}
+              />
             </div>
           </section>
 
@@ -148,38 +316,54 @@ export default function App() {
               <h2 className="text-lg font-bold uppercase tracking-wider">Section 2: Academic Progress</h2>
             </div>
 
-            {/* EARLY YEARS */}
+            {/* MODULE A: EARLY YEARS */}
             {keyStage === 'early_years' && (
               <div className="space-y-6">
                 <p className="text-sm text-gray-500 italic mb-2 print:hidden">Focuses on granular developmental milestones with a 1-3 star visual grading system.</p>
                 
-                {['Communications', 'Numerics & Color/Shapes', 'Motor Skills', 'Reading/Writing'].map((category, idx) => (
+                {earlyYearsData.map((row, idx) => (
                   <div key={idx} className="border border-gray-200 rounded-md overflow-hidden">
-                    <div className="bg-blue-50 print:bg-slate-100 px-4 py-2 font-bold text-blue-800 print:text-slate-800 border-b border-gray-200 print:border-slate-300">{category}</div>
+                    <div className="bg-blue-50 print:bg-slate-100 px-4 py-2 font-bold text-blue-800 print:text-slate-800 border-b border-gray-200 print:border-slate-300">{row.category}</div>
                     <div className="grid grid-cols-12 gap-0 bg-gray-50 print:bg-white text-xs font-semibold text-gray-600 print:text-slate-700 border-b border-gray-200 print:border-slate-300">
                       <div className="col-span-4 p-2">Milestone</div>
                       <div className="col-span-3 p-2 border-l border-gray-200 print:border-slate-300">Grading (1-3)</div>
                       <div className="col-span-5 p-2 border-l border-gray-200 print:border-slate-300">Educator Notes</div>
                     </div>
-                    {[1, 2].map((row) => (
-                      <div key={row} className="grid grid-cols-12 gap-0 border-b border-gray-100 print:border-slate-200 last:border-0">
-                        <div className="col-span-4 p-2"><input className="w-full text-sm outline-none bg-transparent" placeholder={`Enter ${category} milestone...`} /></div>
-                        <div className="col-span-3 p-2 border-l border-gray-100 print:border-slate-200 flex items-center gap-2">
-                          <select className="text-sm bg-transparent outline-none w-full text-yellow-500 print:text-slate-800 font-bold print:appearance-none cursor-pointer">
-                            <option value="3">★★★ (Acing it)</option>
-                            <option value="2">★★☆ (Steady)</option>
-                            <option value="1">★☆☆ (Needs Support)</option>
-                          </select>
-                        </div>
-                        <div className="col-span-5 p-2 border-l border-gray-100 print:border-slate-200"><input className="w-full text-sm outline-none bg-transparent" placeholder="Observation notes..." /></div>
+                    <div className="grid grid-cols-12 gap-0 border-b border-gray-100 print:border-slate-200 last:border-0">
+                      <div className="col-span-4 p-2">
+                        <input 
+                          className="w-full text-sm outline-none bg-transparent" 
+                          placeholder={`Enter ${row.category} milestone...`} 
+                          value={row.milestone}
+                          onChange={(e) => handleEarlyYearsChange(idx, 'milestone', e.target.value)}
+                        />
                       </div>
-                    ))}
+                      <div className="col-span-3 p-2 border-l border-gray-100 print:border-slate-200 flex items-center gap-2">
+                        <select 
+                          className="text-sm bg-transparent outline-none w-full text-yellow-500 print:text-slate-800 font-bold print:appearance-none cursor-pointer"
+                          value={row.grade}
+                          onChange={(e) => handleEarlyYearsChange(idx, 'grade', e.target.value)}
+                        >
+                          <option value="3">★★★ (Acing it)</option>
+                          <option value="2">★★☆ (Steady)</option>
+                          <option value="1">★☆☆ (Needs Support)</option>
+                        </select>
+                      </div>
+                      <div className="col-span-5 p-2 border-l border-gray-100 print:border-slate-200">
+                        <input 
+                          className="w-full text-sm outline-none bg-transparent" 
+                          placeholder="Observation notes..." 
+                          value={row.notes}
+                          onChange={(e) => handleEarlyYearsChange(idx, 'notes', e.target.value)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* JUNIOR */}
+            {/* MODULE B: JUNIOR */}
             {keyStage === 'junior' && (
               <div>
                 <p className="text-sm text-gray-500 italic mb-2 print:hidden">Transitions into formal subjects tracking MTE, ETE, TA%, and final grades.</p>
@@ -195,15 +379,68 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {['English', 'Mathematics', 'Science', 'Computing', 'Art & Design', 'French', 'Geography', 'History', 'Music'].map((subject, idx) => (
-                        <tr key={idx} className="border-b border-gray-100 print:border-slate-200 last:border-0 hover:bg-slate-50">
-                          <td className="p-3 border-r border-gray-100 print:border-slate-200 font-medium text-slate-800">{subject}</td>
-                          <td className="p-2 border-r border-gray-100 print:border-slate-200"><input className="w-full text-center outline-none bg-transparent" placeholder="-" /></td>
-                          <td className="p-2 border-r border-gray-100 print:border-slate-200"><input className="w-full text-center outline-none bg-transparent" placeholder="-" /></td>
-                          <td className="p-2 border-r border-gray-100 print:border-slate-200"><input className="w-full text-center outline-none bg-transparent" placeholder="-" /></td>
-                          <td className="p-2"><input className="w-full text-center font-bold text-slate-700 outline-none bg-transparent" placeholder="-" /></td>
-                        </tr>
-                      ))}
+                      {juniorGrades.map((row, idx) => {
+                        let ta = '';
+                        let autoGrade = '';
+                        const mteNum = parseFloat(row.mte);
+                        const eteNum = parseFloat(row.ete);
+                        
+                        // Automatically calculate TA and Grade if both MTE and ETE are filled out
+                        if (!isNaN(mteNum) && !isNaN(eteNum)) {
+                          const taNum = (mteNum + eteNum) / 2;
+                          ta = taNum.toFixed(1);
+
+                          if (taNum >= 90) autoGrade = 'A1';
+                          else if (taNum >= 80) autoGrade = 'A2';
+                          else if (taNum >= 70) autoGrade = 'B1';
+                          else if (taNum >= 60) autoGrade = 'B2';
+                          else if (taNum >= 50) autoGrade = 'C1';
+                          else if (taNum >= 40) autoGrade = 'C2';
+                          else if (taNum >= 30) autoGrade = 'D1';
+                          else if (taNum >= 20) autoGrade = 'D2';
+                          else autoGrade = 'E';
+                        }
+
+                        return (
+                          <tr key={idx} className="border-b border-gray-100 print:border-slate-200 last:border-0 hover:bg-slate-50">
+                            <td className="p-3 border-r border-gray-100 print:border-slate-200 font-medium text-slate-800">{row.subject}</td>
+                            <td className="p-2 border-r border-gray-100 print:border-slate-200">
+                              <input 
+                                type="number"
+                                className="w-full text-center outline-none bg-transparent" 
+                                placeholder="-" 
+                                value={row.mte}
+                                onChange={(e) => handleJuniorGradeChange(idx, 'mte', e.target.value)}
+                              />
+                            </td>
+                            <td className="p-2 border-r border-gray-100 print:border-slate-200">
+                              <input 
+                                type="number"
+                                className="w-full text-center outline-none bg-transparent" 
+                                placeholder="-" 
+                                value={row.ete}
+                                onChange={(e) => handleJuniorGradeChange(idx, 'ete', e.target.value)}
+                              />
+                            </td>
+                            <td className="p-2 border-r border-gray-100 print:border-slate-200 bg-slate-50 print:bg-white">
+                              <input 
+                                className="w-full text-center outline-none bg-transparent text-slate-500 print:text-slate-800 font-medium cursor-not-allowed" 
+                                placeholder="-" 
+                                value={ta}
+                                readOnly
+                              />
+                            </td>
+                            <td className="p-2 bg-slate-50 print:bg-white">
+                              <input 
+                                className="w-full text-center font-bold text-slate-700 outline-none bg-transparent cursor-not-allowed" 
+                                placeholder="-" 
+                                value={autoGrade}
+                                readOnly
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -213,12 +450,17 @@ export default function App() {
               </div>
             )}
 
-            {/* SENIOR */}
+            {/* MODULE C: SENIOR */}
             {keyStage === 'senior' && (
               <div>
                 <p className="text-sm text-gray-500 italic mb-2 print:hidden">Streamlined quantitative view for standardized testing and higher education preparation.</p>
                 <div className="mb-4 flex gap-4">
-                  <FormInput label="Examination Board & Level" placeholder="e.g. Cambridge IGCSE" />
+                  <FormInput 
+                    label="Examination Board & Level" 
+                    placeholder="e.g. Cambridge IGCSE" 
+                    value={examBoard}
+                    onChange={(e) => setExamBoard(e.target.value)}
+                  />
                 </div>
                 <div className="border border-gray-200 rounded-md overflow-hidden overflow-x-auto">
                   <table className="w-full text-left border-collapse">
@@ -231,12 +473,40 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((row) => (
-                        <tr key={row} className="border-b border-gray-100 print:border-slate-200 last:border-0 hover:bg-slate-50">
-                          <td className="p-2 border-r border-gray-100 print:border-slate-200"><input className="w-full outline-none bg-transparent" placeholder="e.g. 0580" /></td>
-                          <td className="p-2 border-r border-gray-100 print:border-slate-200"><input className="w-full outline-none bg-transparent" placeholder="e.g. Mathematics" /></td>
-                          <td className="p-2 border-r border-gray-100 print:border-slate-200"><input className="w-full text-center outline-none bg-transparent" placeholder="-" /></td>
-                          <td className="p-2"><input className="w-full text-center outline-none bg-transparent font-bold" placeholder="-" /></td>
+                      {seniorGrades.map((row, idx) => (
+                        <tr key={idx} className="border-b border-gray-100 print:border-slate-200 last:border-0 hover:bg-slate-50">
+                          <td className="p-2 border-r border-gray-100 print:border-slate-200">
+                            <input 
+                              className="w-full outline-none bg-transparent" 
+                              placeholder="e.g. 0580" 
+                              value={row.code}
+                              onChange={(e) => handleSeniorGradeChange(idx, 'code', e.target.value)}
+                            />
+                          </td>
+                          <td className="p-2 border-r border-gray-100 print:border-slate-200">
+                            <input 
+                              className="w-full outline-none bg-transparent" 
+                              placeholder="e.g. Mathematics" 
+                              value={row.title}
+                              onChange={(e) => handleSeniorGradeChange(idx, 'title', e.target.value)}
+                            />
+                          </td>
+                          <td className="p-2 border-r border-gray-100 print:border-slate-200">
+                            <input 
+                              className="w-full text-center outline-none bg-transparent" 
+                              placeholder="-" 
+                              value={row.result}
+                              onChange={(e) => handleSeniorGradeChange(idx, 'result', e.target.value)}
+                            />
+                          </td>
+                          <td className="p-2">
+                            <input 
+                              className="w-full text-center outline-none bg-transparent font-bold" 
+                              placeholder="-" 
+                              value={row.mark}
+                              onChange={(e) => handleSeniorGradeChange(idx, 'mark', e.target.value)}
+                            />
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -260,11 +530,21 @@ export default function App() {
                   <div className="space-y-3 mt-3">
                     <div>
                       <label className="text-sm font-semibold text-gray-700">Can work with others</label>
-                      <input className="w-full mt-1 p-2 border border-orange-200 print:border-slate-300 print:border-none print:px-0 rounded text-sm outline-none bg-transparent" placeholder="Add observation notes..." />
+                      <input 
+                        className="w-full mt-1 p-2 border border-orange-200 print:border-slate-300 print:border-none print:px-0 rounded text-sm outline-none bg-transparent" 
+                        placeholder="Add observation notes..."
+                        value={eySocial1}
+                        onChange={(e) => setEySocial1(e.target.value)}
+                      />
                     </div>
                     <div>
                       <label className="text-sm font-semibold text-gray-700">Can express issues and concerns calmly</label>
-                      <input className="w-full mt-1 p-2 border border-orange-200 print:border-slate-300 print:border-none print:px-0 rounded text-sm outline-none bg-transparent" placeholder="Add observation notes..." />
+                      <input 
+                        className="w-full mt-1 p-2 border border-orange-200 print:border-slate-300 print:border-none print:px-0 rounded text-sm outline-none bg-transparent" 
+                        placeholder="Add observation notes..."
+                        value={eySocial2}
+                        onChange={(e) => setEySocial2(e.target.value)}
+                      />
                     </div>
                   </div>
                 </div>
@@ -294,7 +574,11 @@ export default function App() {
                             <div className="text-xs text-slate-500 mt-1 print:hidden">{item.desc}</div>
                           </td>
                           <td className="p-2 text-center">
-                            <select className="w-full p-2 border border-gray-200 print:border-none rounded bg-white text-center font-bold text-slate-700 focus:outline-none cursor-pointer print:appearance-none">
+                            <select 
+                              className="w-full p-2 border border-gray-200 print:border-none rounded bg-white text-center font-bold text-slate-700 focus:outline-none cursor-pointer print:appearance-none"
+                              value={attitudeScores[idx]}
+                              onChange={(e) => handleAttitudeChange(idx, e.target.value)}
+                            >
                               <option value="">-</option>
                               <option value="5">5 - Exceptional</option>
                               <option value="4">4 - Good</option>
@@ -311,10 +595,14 @@ export default function App() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-slate-50 print:bg-white border border-slate-200 print:border-slate-300 rounded-md">
                   <div className="col-span-full mb-2 font-bold text-slate-700">Form Tutor Behavioral Summary</div>
-                  {['Cooperate with Peers', 'Cooperate with Teachers', 'Discipline / Behaviour', 'Grooming & Appearance'].map(item => (
+                  {['Cooperate with Peers', 'Cooperate with Teachers', 'Discipline / Behaviour', 'Grooming & Appearance'].map((item, idx) => (
                      <div key={item} className="flex flex-col">
                        <label className="text-xs font-semibold text-gray-600 mb-1">{item}</label>
-                       <select className="p-2 border border-gray-200 print:border-none print:px-0 rounded text-sm bg-white outline-none cursor-pointer print:appearance-none font-medium text-slate-800">
+                       <select 
+                        className="p-2 border border-gray-200 print:border-none print:px-0 rounded text-sm bg-white outline-none cursor-pointer print:appearance-none font-medium text-slate-800"
+                        value={behavioralScores[idx]}
+                        onChange={(e) => handleBehaviorChange(idx, e.target.value)}
+                      >
                          <option value="Excellent">Excellent</option>
                          <option value="Good">Good</option>
                          <option value="Needs Improvement">Needs Improvement</option>
@@ -339,6 +627,8 @@ export default function App() {
                 <textarea 
                   className="w-full px-3 py-2 border border-gray-300 print:border-none print:p-0 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] print:min-h-0 print:resize-none text-slate-800"
                   placeholder="Provide a holistic view of academic progress and personal development here..."
+                  value={classTeacherComment}
+                  onChange={(e) => setClassTeacherComment(e.target.value)}
                 ></textarea>
               </div>
 
@@ -348,6 +638,8 @@ export default function App() {
                   <textarea 
                     className="w-full px-3 py-2 border border-gray-300 print:border-none print:p-0 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px] print:min-h-0 print:resize-none text-slate-800"
                     placeholder="Final official sign-off remarks..."
+                    value={formTutorComment}
+                    onChange={(e) => setFormTutorComment(e.target.value)}
                   ></textarea>
                 </div>
                 
@@ -356,8 +648,8 @@ export default function App() {
                     <span className="text-xs text-gray-400 italic">Signature</span>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                     <FormInput label="Educator Name" placeholder="Printed Name" />
-                     <FormInput label="Date" type="date" />
+                     <FormInput label="Educator Name" placeholder="Printed Name" value={educatorName} onChange={(e) => setEducatorName(e.target.value)} />
+                     <FormInput label="Date" type="date" value={signDate} onChange={(e) => setSignDate(e.target.value)} />
                   </div>
                 </div>
               </div>
@@ -367,7 +659,7 @@ export default function App() {
         </div>
         
         <div className="bg-slate-100 print:bg-white border-t border-slate-200 text-center py-4 text-sm text-slate-500 print:hidden">
-          Generated via Holistic School Report Card Framework
+          Powered by Zurura Kids: Shah Lalji Nangpar Academy
         </div>
       </div>
     </div>
