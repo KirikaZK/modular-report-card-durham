@@ -244,7 +244,7 @@ export default function App() {
               />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold font-serif tracking-wide">ACADEMIC & PERFORMANCE CARD</h1>
+              <h1 className="text-lg md:text-xl font-bold font-serif tracking-normal whitespace-nowrap">ACADEMIC & PERFORMANCE CARD</h1>
               <p className="text-slate-300 mt-1 text-sm">Durham International School Report</p>
             </div>
           </div>
