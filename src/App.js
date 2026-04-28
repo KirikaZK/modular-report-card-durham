@@ -132,8 +132,8 @@ export default function App() {
     let csvContent = "data:text/csv;charset=utf-8,";
     
     // --- Header ---
-    csvContent += "SHAH LALJI NANGPAR ACADEMY - ACADEMIC & PERFORMANCE CARD\n";
-    csvContent += "P.O. Box 55-20100 Nakuru, Kenya | Tel: +254735490358\n\n";
+    csvContent += "Durham International School - ACADEMIC & PERFORMANCE CARD\n";
+    csvContent += "P.O. Box 43045-00100 Nairobi, Kenya | Tel: +254 700 387426\n\n";
     
     // --- SECTION 1 ---
     csvContent += "SECTION 1: STUDENT DETAILS\n";
@@ -228,10 +228,25 @@ export default function App() {
       <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden print:shadow-none">
         
         {/* SCREEN HEADER (Hidden on Print) */}
-        <div className="bg-slate-800 text-white p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 print:hidden">
-          <div>
-            <h1 className="text-2xl font-bold font-serif tracking-wide">ACADEMIC & PERFORMANCE CARD</h1>
-            <p className="text-slate-300 mt-1 text-sm">Shah Lalji Nangpar Academy Report</p>
+        <div className="bg-[#0e1a98] text-white p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 print:hidden">
+          
+          {/* Main Title & Logo Wrapper */}
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center shrink-0">
+              <img 
+                src="/durham_logo.png" 
+                alt="Durham International School Logo" 
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = "https://placehold.co/100x100/eeeeee/333333?text=Durham";
+                }}
+              />
+            </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold font-serif tracking-wide">ACADEMIC & PERFORMANCE CARD</h1>
+              <p className="text-slate-300 mt-1 text-sm">Durham International School Report</p>
+            </div>
           </div>
           
           <div className="flex items-end gap-3">
@@ -269,25 +284,25 @@ export default function App() {
         </div>
 
         {/* PRINT HEADER (Hidden on Screen, Visible only on PDF) */}
-        <div className="hidden print:flex flex-row justify-between items-end border-b-4 border-slate-800 pb-6 mb-6 pt-4">
+        <div className="hidden print:flex flex-row justify-between items-end border-b-4 border-[#0e1a98] pb-6 mb-6 pt-4">
           <div className="flex items-center gap-6">
             <div className="w-28 h-28 flex items-center justify-center shrink-0">
               <img 
-                src="/shah_lalji_logo.jpg" 
-                alt="Shah Lalji Nangpar Academy Logo" 
+                src="/durham_logo.png" 
+                alt="Durham International School Logo" 
                 className="max-w-full max-h-full object-contain"
                 onError={(e) => {
                   e.target.onerror = null; 
-                  e.target.src = "https://placehold.co/100x100/eeeeee/333333?text=SLNA";
+                  e.target.src = "https://placehold.co/100x100/eeeeee/333333?text=Durham";
                 }}
               />
             </div>
             <div>
-              <h1 className="text-3xl font-bold font-serif tracking-wide text-black uppercase">
-                Shah Lalji Nangpar Academy
+              <h1 className="text-2xl font-bold font-serif tracking-wide text-black uppercase">
+                Durham International School
               </h1>
               <p className="text-slate-700 mt-1 text-base font-medium">
-                P.O. Box 55-20100 Nakuru, Kenya | Tel: +254735490358
+                P.O. Box 43045-00100 Nairobi, Kenya | Tel: +254 700 387426
               </p>
               <div className="mt-3 border-t border-slate-300 pt-2 inline-block">
                 <h2 className="text-xl font-bold text-slate-800 uppercase tracking-widest">
@@ -688,7 +703,7 @@ export default function App() {
         </div>
         
         <div className="bg-slate-100 print:bg-white border-t border-slate-200 text-center py-4 text-sm text-slate-500 print:hidden">
-          Powered by Zurura Kids: Shah Lalji Nangpar Academy
+          Powered by Zurura Kids: Durham International School
         </div>
       </div>
     </div>
